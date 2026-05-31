@@ -24,6 +24,9 @@ dependencies {
         // Add necessary plugin dependencies for compilation here, example:
         // bundledPlugin("com.intellij.java")
     }
+
+    // WinRT access uses JNA, which is provided by the IntelliJ Platform at runtime; the imports
+    // (com.sun.jna.*) resolve against the platform dependency, so no extra dependency is needed.
 }
 
 intellijPlatform {

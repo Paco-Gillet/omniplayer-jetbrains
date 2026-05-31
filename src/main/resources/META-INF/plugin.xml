@@ -12,7 +12,7 @@
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
-    <description>A media player directly integrated in your JetBrains IDE interface that use Windows media keys to control your music.</description>
+    <description>A media player directly integrated in your JetBrains IDE interface. It controls your music through the Windows System Media Transport Controls API, showing the current track and letting you play, pause and skip the active media session.</description>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
