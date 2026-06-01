@@ -101,6 +101,33 @@ internal object WinRt {
     }
 
     /**
+     * `IUnknown::QueryInterface` — return the [iid] interface of [self] (caller owns it and must
+     * release it), or `null` if it is not supported.
+     */
+    fun queryInterface(self: Pointer, iid: String): Pointer? {
+        val ref = PointerByReference()
+        return if (call(self, QUERY_INTERFACE, guid(iid), ref) == 0) ref.value else null
+    }
+
+    /**
+     * Obtain the activation factory for runtime class [classId] under interface [iid], run [block]
+     * with it, and release the factory afterwards. Returns `null` if activation fails.
+     */
+    fun <T> withActivationFactory(classId: String, iid: String, block: (Pointer) -> T): T? =
+        withHString(classId) { classIdHandle ->
+            val factoryRef = PointerByReference()
+            if (combase.RoGetActivationFactory(classIdHandle, guid(iid), factoryRef) != 0 || factoryRef.value == null) {
+                return@withHString null
+            }
+            val factory = factoryRef.value
+            try {
+                block(factory)
+            } finally {
+                release(factory)
+            }
+        }
+
+    /**
      * Create a fast-pass HSTRING for [value] and run [block] with it. The backing UTF-16 buffer and
      * the `HSTRING_HEADER` must stay alive for as long as the HSTRING is used, so they are held on
      * the stack here and the HSTRING is only valid inside [block]. A string reference owns no heap
@@ -146,6 +173,20 @@ internal object WinRt {
                 // Drain the boolean result so the operation is properly closed.
                 call(asyncOperation, ASYNC_OPERATION_GET_RESULTS, Memory(1))
             }
+        } finally {
+            release(asyncOperation)
+        }
+    }
+
+    /**
+     * Await an `IAsyncOperation<UInt32>` (e.g. `DataReader.LoadAsync`) and return its result, or
+     * `-1` on failure. The operation is always released.
+     */
+    fun awaitUInt(asyncOperation: Pointer, timeoutMs: Long = 4000): Int {
+        try {
+            if (!awaitCompletion(asyncOperation, timeoutMs)) return -1
+            val result = IntByReference()
+            return if (call(asyncOperation, ASYNC_OPERATION_GET_RESULTS, result) == 0) result.value else -1
         } finally {
             release(asyncOperation)
         }
