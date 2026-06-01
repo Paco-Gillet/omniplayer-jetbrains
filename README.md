@@ -51,36 +51,6 @@ browsers, Windows Media Player, etc.) is supported.
 | IDE | IntelliJ Platform 2025.1+ (`since-build` 251) |
 | Runtime | JDK 21 |
 
-## Publishing
-
-The build is configured to sign and upload the plugin to the
-[JetBrains Marketplace](https://plugins.jetbrains.com). Secrets are read from environment variables
-(or `gradle.properties`) and are never committed.
-
-```bash
-# Marketplace upload token (Marketplace → profile → My Tokens)
-export PUBLISH_TOKEN=...
-
-# Optional but recommended: plugin signing
-export CERTIFICATE_CHAIN=/path/to/chain.crt
-export PRIVATE_KEY=/path/to/private.pem
-export PRIVATE_KEY_PASSWORD=...
-
-./gradlew publishPlugin     # builds, signs (if keys set) and uploads
-```
-
-For the very first upload you can also just build the ZIP and upload it manually on the Marketplace
-website:
-
-```bash
-./gradlew buildPlugin       # build/distributions/omni-player-<version>.zip
-```
-
-See the JetBrains guide on
-[signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html) and
-[publishing](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html) for how to generate
-the certificate/key pair and the token.
-
 ## License
 
 Released under the [MIT License](LICENSE).

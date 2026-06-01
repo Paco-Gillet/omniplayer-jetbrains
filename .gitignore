@@ -12,6 +12,9 @@ secrets/
 chain.crt
 gradle-local.properties
 
+### Maintainer-only notes (not for the public repo)
+*.local.md
+
 ### IntelliJ IDEA ###
 .idea/
 .run/
