@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.paco-gillet"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -33,11 +33,31 @@ intellijPlatform {
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "251"
+            // Empty untilBuild = no upper bound, so the plugin keeps working on future IDE builds.
+            untilBuild = provider { null }
         }
 
         changeNotes = """
-            Initial version
+            Initial release: control the active Windows media session from a tool window — cover art,
+            track title/artist, a live progress bar and play / pause / next / previous controls,
+            powered by the Windows System Media Transport Controls (WinRT) API.
         """.trimIndent()
+    }
+
+    // Optional plugin signing — recommended by JetBrains. Keys are read from the environment (or
+    // gradle.properties) and are never committed; if they are absent, `signPlugin` is simply not
+    // used and `buildPlugin` still works. See README "Publishing".
+    signing {
+        certificateChainFile = providers.environmentVariable("CERTIFICATE_CHAIN").map { file(it) }
+        privateKeyFile = providers.environmentVariable("PRIVATE_KEY").map { file(it) }
+        password = providers.environmentVariable("PRIVATE_KEY_PASSWORD")
+    }
+
+    // `./gradlew publishPlugin` uploads the (signed) ZIP to the Marketplace using PUBLISH_TOKEN.
+    publishing {
+        token = providers.environmentVariable("PUBLISH_TOKEN")
+            .orElse(providers.gradleProperty("publishToken"))
+        channels = listOf("default") // stable channel
     }
 }
 

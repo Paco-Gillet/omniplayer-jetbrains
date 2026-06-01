@@ -6,6 +6,12 @@ build/
 .kotlin
 .claude
 
+### Plugin signing / publishing secrets — never commit these
+secrets/
+*.pem
+chain.crt
+gradle-local.properties
+
 ### IntelliJ IDEA ###
 .idea/
 .run/
