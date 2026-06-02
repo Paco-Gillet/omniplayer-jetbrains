@@ -68,6 +68,14 @@ intellijPlatform {
             .orElse(providers.gradleProperty("publishToken"))
         channels = listOf("default") // stable channel
     }
+
+    // `./gradlew verifyPlugin` runs the IntelliJ Plugin Verifier locally (same checks as the
+    // Marketplace) against the minimum supported IDE.
+    pluginVerification {
+        ides {
+            ide(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity, "2025.1.4.1")
+        }
+    }
 }
 
 tasks {

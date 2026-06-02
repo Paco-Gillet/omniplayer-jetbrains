@@ -297,7 +297,9 @@ class MusicPlayerToolWindow(parent: Disposable) {
         }
 
     private fun timeLabel(): JBLabel = JBLabel("").apply {
-        font = JBFont.smallOrNewUiMedium()
+        // JBFont.small() is the public API for a small label font (smallOrNewUiMedium is marked
+        // internal by the platform and flagged by the Marketplace verifier).
+        font = JBFont.small()
         foreground = JBUI.CurrentTheme.Label.disabledForeground()
     }
 
