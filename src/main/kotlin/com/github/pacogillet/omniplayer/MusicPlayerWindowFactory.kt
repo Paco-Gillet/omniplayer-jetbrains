@@ -74,9 +74,27 @@ class MusicPlayerToolWindow(parent: Disposable) {
     private var durationMs: Long = 0
     private var isPlaying: Boolean = false
     private var lastSyncNanos: Long = 0
+    // True while the user is dragging the progress bar: freeze the ticker and incoming polls so the
+    // scrub preview isn't overwritten until they release.
+    private var scrubbing: Boolean = false
 
     init {
         content = buildUi()
+        progressBar.onScrub = { previewMs ->
+            // Live preview while dragging: show the target time without touching the player yet.
+            scrubbing = true
+            updateProgressUi(previewMs)
+        }
+        progressBar.onSeek = { targetMs ->
+            // On release: optimistically reflect the new position, perform the real seek, then
+            // re-sync shortly after so the bar tracks the player's actual state.
+            scrubbing = false
+            basePositionMs = targetMs
+            lastSyncNanos = System.nanoTime()
+            updateProgressUi(targetMs)
+            WindowsMediaController.seekTo(targetMs)
+            refreshSoon()
+        }
         ticker.isRepeats = true
         ticker.start()
         Disposable { ticker.stop() }.also { com.intellij.openapi.util.Disposer.register(parent, it) }
@@ -208,9 +226,14 @@ class MusicPlayerToolWindow(parent: Disposable) {
         playPauseButton.icon = if (isPlaying) AllIcons.Actions.Pause else AllIcons.Actions.Resume
 
         durationMs = nowPlaying.durationMs
-        basePositionMs = nowPlaying.positionMs
-        lastSyncNanos = System.nanoTime()
-        updateProgressUi(nowPlaying.positionMs)
+
+        // While the user is scrubbing, leave the position/time display alone so the live preview
+        // isn't overwritten by an incoming poll.
+        if (!scrubbing) {
+            basePositionMs = nowPlaying.positionMs
+            lastSyncNanos = System.nanoTime()
+            updateProgressUi(nowPlaying.positionMs)
+        }
 
         if (trackChanged) {
             currentTrackKey = nowPlaying.trackKey
@@ -220,20 +243,25 @@ class MusicPlayerToolWindow(parent: Disposable) {
 
     /** Advances the displayed position between polls so the bar moves smoothly while playing. */
     private fun tickProgress() {
-        if (durationMs <= 0) return
-        val position = if (isPlaying) {
+        // Keep ticking even when the duration is unknown (some sources don't report it), so at least
+        // the elapsed time advances. Only the active scrub preview should freeze the display.
+        if (scrubbing) return
+        var position = if (isPlaying) {
             val elapsed = (System.nanoTime() - lastSyncNanos) / 1_000_000
-            (basePositionMs + elapsed).coerceAtMost(durationMs)
+            basePositionMs + elapsed
         } else {
             basePositionMs
         }
+        if (durationMs > 0) position = position.coerceAtMost(durationMs)
         updateProgressUi(position)
     }
 
     private fun updateProgressUi(positionMs: Long) {
         progressBar.setProgress(positionMs, durationMs)
         elapsedLabel.text = formatTime(positionMs)
-        remainingLabel.text = "-" + formatTime((durationMs - positionMs).coerceAtLeast(0))
+        // When the duration is unknown (e.g. Apple Music in the browser), there's no meaningful
+        // "remaining" value, so show a placeholder instead of a bogus -0:00.
+        remainingLabel.text = if (durationMs > 0) "-" + formatTime(durationMs - positionMs) else "--:--"
     }
 
     private fun decodeImage(bytes: ByteArray?): BufferedImage? {

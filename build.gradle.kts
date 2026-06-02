@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.paco-gillet"
-version = "1.0.0"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
@@ -38,9 +38,18 @@ intellijPlatform {
         }
 
         changeNotes = """
-            Initial release: control the active Windows media session from a tool window — cover art,
-            track title/artist, a live progress bar and play / pause / next / previous controls,
-            powered by the Windows System Media Transport Controls (WinRT) API.
+            <b>1.1.0</b>
+            <ul>
+              <li>Seek by clicking or dragging the progress bar, with a live time preview while dragging.</li>
+              <li>The progress now advances smoothly for all sources (including browsers), instead of
+                  only updating on play/pause or track changes.</li>
+            </ul>
+            <b>1.0.0</b>
+            <ul>
+              <li>Control the active Windows media session from a tool window — cover art, track
+                  title/artist, a progress bar and play / pause / next / previous controls, powered by
+                  the Windows System Media Transport Controls (WinRT) API.</li>
+            </ul>
         """.trimIndent()
     }
 
