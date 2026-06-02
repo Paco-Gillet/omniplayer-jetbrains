@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.paco-gillet"
-version = "1.1.0"
+version = "1.1.1"
 
 repositories {
     mavenCentral()
@@ -38,6 +38,11 @@ intellijPlatform {
         }
 
         changeNotes = """
+            <b>1.1.1</b>
+            <ul>
+              <li>Replaced an internal IDE API with its public equivalent (no functional change),
+                  fixing the Marketplace verifier's internal-API warning.</li>
+            </ul>
             <b>1.1.0</b>
             <ul>
               <li>Seek by clicking or dragging the progress bar, with a live time preview while dragging.</li>
